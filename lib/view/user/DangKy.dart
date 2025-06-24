@@ -215,8 +215,21 @@ class _DangKyKhachHangPageState extends State<DangKyKhachHangPage> {
                   fillColor: Colors.grey[50],
                 ),
                 obscureText: true,
-                validator: (value) =>
-                    value!.length < 6 ? 'Mật khẩu tối thiểu 6 ký tự' : null,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Vui lòng nhập mật khẩu';
+                  }
+                  if (value.length < 8) {
+                    return 'Mật khẩu tối thiểu 8 ký tự';
+                  }
+                  // Kiểm tra mật khẩu mạnh (như backend)
+                  if (!RegExp(
+                    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$',
+                  ).hasMatch(value)) {
+                    return 'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt';
+                  }
+                  return null;
+                },
                 enabled: !_isLoading,
               ),
               SizedBox(height: 16),

@@ -38,9 +38,21 @@ class UserService {
           'message': data['message'] ?? 'Đăng ký thành công!',
         };
       } else {
+        // Xử lý lỗi từ backend
+        String errorMessage = data['message'] ?? 'Đăng ký không thành công';
+
+        // Nếu có danh sách errors từ backend, kết hợp chúng
+        if (data['errors'] != null && data['errors'] is List) {
+          List<String> errors = List<String>.from(data['errors']);
+          if (errors.isNotEmpty) {
+            errorMessage = errors.join('\n');
+          }
+        }
+
         return {
           'error': true,
-          'message': data['message'] ?? 'Đăng ký thất bại.',
+          'message': errorMessage,
+          'errors': data['errors'], // Trả về danh sách lỗi gốc nếu cần
         };
       }
     } catch (e) {
@@ -106,7 +118,7 @@ class UserService {
       await prefs.setString('soDienThoai', taiKhoan['soDienThoai'] ?? '');
       await prefs.setInt('maLoaiTaiKhoan', taiKhoan['maLoaiTaiKhoan'] ?? 2);
       await prefs.setInt('maTaiKhoan', taiKhoan['maTaiKhoan'] ?? 0);
-      await prefs.setBool('isLoggedIn', true); // Dòng gộp từ AuthService
+      await prefs.setBool('isLoggedIn', true);
     }
   }
 
@@ -128,7 +140,6 @@ class UserService {
   static Future<int?> getMaLoaiTaiKhoan() async =>
       (await SharedPreferences.getInstance()).getInt('maLoaiTaiKhoan');
 
-  // ✅ Thêm hàm lấy mã tài khoản
   static Future<int?> getMaTaiKhoan() async =>
       (await SharedPreferences.getInstance()).getInt('maTaiKhoan');
 
@@ -189,8 +200,8 @@ class UserService {
     }
     if (matKhau.trim().isEmpty) {
       errors['matKhau'] = 'Mật khẩu không được để trống';
-    } else if (matKhau.length < 6) {
-      errors['matKhau'] = 'Mật khẩu tối thiểu 6 ký tự';
+    } else if (matKhau.length < 8) {
+      errors['matKhau'] = 'Mật khẩu tối thiểu 8 ký tự';
     }
     if (soDienThoai.trim().isEmpty) {
       errors['soDienThoai'] = 'Số điện thoại không được để trống';
